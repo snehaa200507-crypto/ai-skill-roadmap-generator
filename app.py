@@ -412,7 +412,7 @@ if page == "Home":
     if profile:
         st.subheader("👤 Student Profile")
         st.write(f"Welcome, **{profile['full_name']}**!")
-        st.write(f"Career Goal: {profile['career_goal']}")
+        st.write(f"Selected Course: {profile.get('course', profile.get('career_goal', ''))}")
 
 
 # ==================================================
@@ -428,7 +428,23 @@ elif page == "Student Profile":
 
     education_options = [
         "Select Education", "Class 10", "Class 12", "Diploma",
-        "BCA", "BBA", "B.Tech", "Graduate", "Postgraduate", "Other"
+        "Undergraduate", "Postgraduate", "Graduate", "Other"
+    ]
+
+    course_options = [
+        "Select a Course / Skill",
+        "Digital Marketing",
+        "Social Media Management",
+        "Web Development",
+        "Python Programming",
+        "Data Science",
+        "Artificial Intelligence",
+        "Graphic Designing",
+        "UI/UX Designing",
+        "Video Editing",
+        "Content Writing",
+        "Cybersecurity",
+        "Other"
     ]
 
     skill_options = ["Beginner", "Intermediate", "Advanced"]
@@ -451,7 +467,7 @@ elif page == "Student Profile":
         )
 
         education = st.selectbox(
-            "Education / Qualification",
+            "Education Level",
             education_options,
             index=(
                 education_options.index(profile.get("education"))
@@ -459,11 +475,17 @@ elif page == "Student Profile":
             )
         )
 
-        st.subheader("Learning Preferences")
-
-        career_goal = st.text_input(
-            "Career Goal", value=profile.get("career_goal", "")
+        course_selection = st.selectbox(
+            "Course / Skill You Want to Learn",
+            course_options,
+            index=(
+                course_options.index(profile.get("course"))
+                if profile.get("course") in course_options else 0
+            ),
+            help="Choose a skill such as Digital Marketing, Python, or Web Development."
         )
+
+        st.subheader("Learning Preferences")
 
         skill_level = st.selectbox(
             "Current Skill Level",
@@ -511,8 +533,11 @@ elif page == "Student Profile":
             if not full_name.strip():
                 st.error("Please enter your full name.")
 
-            elif not career_goal.strip():
-                st.error("Please enter your career goal.")
+            elif course_selection == "Select a Course / Skill":
+                st.error("Please select the course or skill you want to learn.")
+
+            elif education == "Select Education":
+                st.error("Please select your education level.")
 
             elif email.strip() and ("@" not in email or "." not in email):
                 st.error("Please enter a valid email address.")
@@ -522,7 +547,8 @@ elif page == "Student Profile":
                     "full_name": full_name,
                     "email": email,
                     "education": education,
-                    "career_goal": career_goal,
+                    "course": course_selection,
+                    "career_goal": course_selection,
                     "skill_level": skill_level,
                     "daily_time": daily_time,
                     "budget": budget,
@@ -547,6 +573,7 @@ elif page == "Student Profile":
             st.write("**Name:**", profile.get("full_name", ""))
             st.write("**Email:**", profile.get("email", ""))
             st.write("**Education:**", profile.get("education", ""))
+            st.write("**Selected Course:**", profile.get("course", profile.get("career_goal", "")))
 
         with col2:
             st.write("**Career Goal:**", profile.get("career_goal", ""))
@@ -583,7 +610,8 @@ elif page == "Generate Roadmap":
         )
 
         career_goal = st.text_input(
-            "Career Goal", value=profile.get("career_goal", "")
+            "Career Goal / Selected Course",
+            value=profile.get("course") or profile.get("career_goal", "")
         )
 
         skill_level = st.selectbox(
