@@ -11,7 +11,10 @@ from database import (
     get_progress_summary,
     delete_roadmap,
     save_student_profile,
-    get_student_profile
+    get_student_profile,
+    register_user,
+    authenticate_user,
+    get_user_by_id
 )
 
 from utils.ai_helper import generate_roadmap
@@ -223,12 +226,105 @@ def show_pdf_download(user_input, roadmap, key):
         st.error(f"PDF generation error: {error}")
 
 
+
+# ==================================================
+# LOGIN / REGISTRATION AND USER SESSION
+# ==================================================
+
+if "user_id" not in st.session_state:
+    st.title("🎓 AI Skill Development Roadmap Generator")
+    st.subheader("Welcome! Login or create your student account.")
+
+    login_tab, register_tab = st.tabs(["Login", "Register"])
+
+    with login_tab:
+        with st.form("login_form"):
+            login_email = st.text_input("Email Address", key="login_email")
+            login_password = st.text_input(
+                "Password", type="password", key="login_password"
+            )
+            login_submit = st.form_submit_button(
+                "Login", use_container_width=True
+            )
+
+        if login_submit:
+            if not login_email.strip() or not login_password:
+                st.error("Please enter your email and password.")
+            else:
+                account = authenticate_user(login_email, login_password)
+                if account:
+                    st.session_state["user_id"] = account["user_id"]
+                    st.session_state["user_name"] = account["full_name"]
+                    st.session_state["user_email"] = account["email"]
+                    st.success("Login successful!")
+                    st.rerun()
+                else:
+                    st.error("Incorrect email or password.")
+
+    with register_tab:
+        with st.form("register_form"):
+            reg_name = st.text_input("Full Name", key="reg_name")
+            reg_email = st.text_input("Email Address", key="reg_email")
+            reg_password = st.text_input(
+                "Create Password (minimum 8 characters)",
+                type="password",
+                key="reg_password"
+            )
+            reg_confirm = st.text_input(
+                "Confirm Password", type="password", key="reg_confirm"
+            )
+            register_submit = st.form_submit_button(
+                "Create Account", use_container_width=True
+            )
+
+        if register_submit:
+            if not reg_name.strip() or not reg_email.strip():
+                st.error("Please enter your name and email.")
+            elif reg_password != reg_confirm:
+                st.error("Passwords do not match.")
+            else:
+                try:
+                    new_user_id = register_user(
+                        reg_name, reg_email, reg_password
+                    )
+                    st.session_state["user_id"] = new_user_id
+                    st.session_state["user_name"] = reg_name.strip()
+                    st.session_state["user_email"] = reg_email.strip().lower()
+                    st.success("Account created successfully!")
+                    st.rerun()
+                except ValueError as error:
+                    st.error(str(error))
+                except Exception as error:
+                    st.error(f"Registration error: {error}")
+
+    st.info("Each student must use their own account to keep their data private.")
+    st.stop()
+
+
+# Confirm that the logged-in account still exists.
+current_user_id = st.session_state["user_id"]
+current_account = get_user_by_id(current_user_id)
+
+if not current_account:
+    st.session_state.clear()
+    st.rerun()
+
+st.session_state["user_name"] = current_account["full_name"]
+st.session_state["user_email"] = current_account["email"]
+
+
 # ==================================================
 # SIDEBAR NAVIGATION
 # ==================================================
 
 st.sidebar.title("🎓 AI Roadmap Generator")
 st.sidebar.caption("Learn • Practice • Grow")
+st.sidebar.success(f"Logged in: {st.session_state['user_name']}")
+st.sidebar.caption(st.session_state["user_email"])
+
+if st.sidebar.button("Logout", use_container_width=True):
+    st.session_state.clear()
+    st.rerun()
 
 page = st.sidebar.radio(
     "Navigation",
@@ -260,14 +356,14 @@ if page == "Home":
         "and track your career development."
     )
 
-    roadmaps = get_all_roadmaps()
+    roadmaps = get_all_roadmaps(current_user_id)
 
     total_roadmaps = len(roadmaps)
     total_tasks = 0
     completed_tasks = 0
 
     for roadmap_item in roadmaps:
-        tasks = get_tasks(roadmap_item["roadmap_id"])
+        tasks = get_tasks(roadmap_item["roadmap_id"], current_user_id)
         total_tasks += len(tasks)
 
         completed_tasks += sum(
@@ -311,7 +407,7 @@ if page == "Home":
     else:
         st.info("No roadmaps created yet.")
 
-    profile = get_student_profile()
+    profile = get_student_profile(current_user_id)
 
     if profile:
         st.subheader("👤 Student Profile")
@@ -328,7 +424,7 @@ elif page == "Student Profile":
     st.title("👤 Student Profile")
     st.write("Create and manage your personal learning profile.")
 
-    profile = get_student_profile() or {}
+    profile = get_student_profile(current_user_id) or {}
 
     education_options = [
         "Select Education", "Class 10", "Class 12", "Diploma",
@@ -351,7 +447,7 @@ elif page == "Student Profile":
         )
 
         email = st.text_input(
-            "Email Address", value=profile.get("email", "")
+            "Account Email", value=st.session_state["user_email"], disabled=True
         )
 
         education = st.selectbox(
@@ -434,7 +530,7 @@ elif page == "Student Profile":
                 }
 
                 try:
-                    save_student_profile(profile_data)
+                    save_student_profile(current_user_id, profile_data)
                     st.success("Student profile saved successfully!")
                     st.rerun()
 
@@ -469,7 +565,7 @@ elif page == "Generate Roadmap":
 
     st.title("✨ Generate Your Learning Roadmap")
 
-    profile = get_student_profile() or {}
+    profile = get_student_profile(current_user_id) or {}
 
     skill_options = ["Beginner", "Intermediate", "Advanced"]
     time_options = [
@@ -567,6 +663,7 @@ elif page == "Generate Roadmap":
 
             try:
                 roadmap_id = save_roadmap(
+                    current_user_id,
                     full_name,
                     career_goal,
                     skill_level,
@@ -605,7 +702,7 @@ elif page == "My Roadmaps":
 
     st.title("📚 My Saved Roadmaps")
 
-    roadmaps = get_all_roadmaps()
+    roadmaps = get_all_roadmaps(current_user_id)
 
     if not roadmaps:
         st.info("You have not created any roadmaps yet.")
@@ -639,7 +736,7 @@ elif page == "My Roadmaps":
                     "View Full Roadmap",
                     key=f"view_{roadmap_id}"
                 ):
-                    selected = get_roadmap(roadmap_id)
+                    selected = get_roadmap(roadmap_id, current_user_id)
 
                     if selected:
                         st.session_state["selected_roadmap"] = selected
@@ -661,7 +758,7 @@ elif page == "My Roadmaps":
                             "Yes, Delete",
                             key=f"confirm_{roadmap_id}"
                         ):
-                            delete_roadmap(roadmap_id)
+                            delete_roadmap(roadmap_id, current_user_id)
                             st.session_state.pop("confirm_delete", None)
                             st.success("Roadmap deleted.")
                             st.rerun()
@@ -759,7 +856,7 @@ elif page == "Progress Tracking":
 
     st.title("📈 Learning Progress Tracking")
 
-    roadmaps = get_all_roadmaps()
+    roadmaps = get_all_roadmaps(current_user_id)
 
     if not roadmaps:
         st.info("Generate a roadmap to start tracking your progress.")
@@ -778,7 +875,7 @@ elif page == "Progress Tracking":
 
         roadmap_id = roadmap_options[selected_label]
 
-        summary = get_progress_summary(roadmap_id)
+        summary = get_progress_summary(roadmap_id, current_user_id)
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -790,7 +887,7 @@ elif page == "Progress Tracking":
         st.subheader("Overall Progress")
         st.progress(summary["percentage"] / 100)
 
-        tasks = get_tasks(roadmap_id)
+        tasks = get_tasks(roadmap_id, current_user_id)
 
         st.subheader("Task Checklist")
 
@@ -810,7 +907,7 @@ elif page == "Progress Tracking":
                 )
 
                 if checked != completed:
-                    update_task_progress(task_id, checked)
+                    update_task_progress(task_id, current_user_id, checked)
                     st.rerun()
 
         st.subheader("Weekly Progress")
@@ -856,7 +953,7 @@ elif page == "Advanced Analytics":
         "roadmap progress and task completion."
     )
 
-    roadmaps = get_all_roadmaps()
+    roadmaps = get_all_roadmaps(current_user_id)
 
     if not roadmaps:
 
@@ -872,7 +969,7 @@ elif page == "Advanced Analytics":
         for item in roadmaps:
 
             roadmap_id = item["roadmap_id"]
-            tasks = get_tasks(roadmap_id)
+            tasks = get_tasks(roadmap_id, current_user_id)
 
             task_total = len(tasks)
 
