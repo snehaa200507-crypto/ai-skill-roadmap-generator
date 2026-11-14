@@ -13,15 +13,29 @@ from roadmap_model import Roadmap
 # ENVIRONMENT CONFIGURATION
 # --------------------------------------------------
 
+
+# --------------------------------------------------
+# ENVIRONMENT CONFIGURATION
+# --------------------------------------------------
+
+import streamlit as st
+
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+# First read local .env, then Streamlit Cloud Secrets
+API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 
-# You can change the model through .env without editing this file.
+if not API_KEY:
+    try:
+        API_KEY = st.secrets.get("GEMINI_API_KEY", "")
+    except Exception:
+        API_KEY = ""
+
 MODEL_NAME = os.getenv(
     "GEMINI_MODEL",
     "gemini-3.5-flash-lite"
 )
+
 
 
 # --------------------------------------------------
