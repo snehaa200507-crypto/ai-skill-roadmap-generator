@@ -326,17 +326,28 @@ if st.sidebar.button("Logout", use_container_width=True):
     st.session_state.clear()
     st.rerun()
 
+PAGES = [
+    "Home",
+    "Student Profile",
+    "Generate Roadmap",
+    "My Roadmaps",
+    "Learning Resources",
+    "Progress Tracking",
+    "Advanced Analytics"
+]
+
+# Apply a page selected by the bottom Next/Previous buttons
+# before creating the sidebar radio widget.
+if "pending_page" in st.session_state:
+    st.session_state["selected_page"] = st.session_state.pop("pending_page")
+
+if "selected_page" not in st.session_state:
+    st.session_state["selected_page"] = "Home"
+
 page = st.sidebar.radio(
     "Navigation",
-    [
-        "Home",
-        "Student Profile",
-        "Generate Roadmap",
-        "My Roadmaps",
-        "Learning Resources",
-        "Progress Tracking",
-        "Advanced Analytics"
-    ]
+    PAGES,
+    key="selected_page"
 )
 
 st.sidebar.markdown("---")
@@ -412,7 +423,7 @@ if page == "Home":
     if profile:
         st.subheader("👤 Student Profile")
         st.write(f"Welcome, **{profile['full_name']}**!")
-        st.write(f"Selected Course: {profile.get('course', profile.get('career_goal', ''))}")
+        st.write(f"Career Goal: {profile['career_goal']}")
 
 
 # ==================================================
@@ -428,23 +439,7 @@ elif page == "Student Profile":
 
     education_options = [
         "Select Education", "Class 10", "Class 12", "Diploma",
-        "Undergraduate", "Postgraduate", "Graduate", "Other"
-    ]
-
-    course_options = [
-        "Select a Course / Skill",
-        "Digital Marketing",
-        "Social Media Management",
-        "Web Development",
-        "Python Programming",
-        "Data Science",
-        "Artificial Intelligence",
-        "Graphic Designing",
-        "UI/UX Designing",
-        "Video Editing",
-        "Content Writing",
-        "Cybersecurity",
-        "Other"
+        "BCA", "BBA", "B.Tech", "Graduate", "Postgraduate", "Other"
     ]
 
     skill_options = ["Beginner", "Intermediate", "Advanced"]
@@ -467,7 +462,7 @@ elif page == "Student Profile":
         )
 
         education = st.selectbox(
-            "Education Level",
+            "Education / Qualification",
             education_options,
             index=(
                 education_options.index(profile.get("education"))
@@ -475,17 +470,11 @@ elif page == "Student Profile":
             )
         )
 
-        course_selection = st.selectbox(
-            "Course / Skill You Want to Learn",
-            course_options,
-            index=(
-                course_options.index(profile.get("course"))
-                if profile.get("course") in course_options else 0
-            ),
-            help="Choose a skill such as Digital Marketing, Python, or Web Development."
-        )
-
         st.subheader("Learning Preferences")
+
+        career_goal = st.text_input(
+            "Career Goal", value=profile.get("career_goal", "")
+        )
 
         skill_level = st.selectbox(
             "Current Skill Level",
@@ -533,11 +522,8 @@ elif page == "Student Profile":
             if not full_name.strip():
                 st.error("Please enter your full name.")
 
-            elif course_selection == "Select a Course / Skill":
-                st.error("Please select the course or skill you want to learn.")
-
-            elif education == "Select Education":
-                st.error("Please select your education level.")
+            elif not career_goal.strip():
+                st.error("Please enter your career goal.")
 
             elif email.strip() and ("@" not in email or "." not in email):
                 st.error("Please enter a valid email address.")
@@ -547,8 +533,7 @@ elif page == "Student Profile":
                     "full_name": full_name,
                     "email": email,
                     "education": education,
-                    "course": course_selection,
-                    "career_goal": course_selection,
+                    "career_goal": career_goal,
                     "skill_level": skill_level,
                     "daily_time": daily_time,
                     "budget": budget,
@@ -573,7 +558,6 @@ elif page == "Student Profile":
             st.write("**Name:**", profile.get("full_name", ""))
             st.write("**Email:**", profile.get("email", ""))
             st.write("**Education:**", profile.get("education", ""))
-            st.write("**Selected Course:**", profile.get("course", profile.get("career_goal", "")))
 
         with col2:
             st.write("**Career Goal:**", profile.get("career_goal", ""))
@@ -610,8 +594,7 @@ elif page == "Generate Roadmap":
         )
 
         career_goal = st.text_input(
-            "Career Goal / Selected Course",
-            value=profile.get("course") or profile.get("career_goal", "")
+            "Career Goal", value=profile.get("career_goal", "")
         )
 
         skill_level = st.selectbox(
@@ -1140,6 +1123,31 @@ elif page == "Advanced Analytics":
             "Analytics are calculated from your saved roadmap tasks "
             "and progress records."
         )
+
+
+# ==================================================
+# BOTTOM PAGE NAVIGATION (RIGHT SIDE)
+# ==================================================
+
+current_page_index = PAGES.index(page)
+st.divider()
+
+# Keep the navigation controls aligned to the right side.
+nav_space, previous_col, next_col = st.columns([6, 1.5, 1.5])
+
+with previous_col:
+    if current_page_index > 0:
+        if st.button("← Previous", use_container_width=True, key="bottom_previous_button"):
+            st.session_state["pending_page"] = PAGES[current_page_index - 1]
+            st.rerun()
+
+with next_col:
+    if current_page_index < len(PAGES) - 1:
+        if st.button("Next →", use_container_width=True, key="bottom_next_button"):
+            st.session_state["pending_page"] = PAGES[current_page_index + 1]
+            st.rerun()
+
+st.caption(f"Page {current_page_index + 1} of {len(PAGES)}")
 
 
 # ==================================================
