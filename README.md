@@ -1,132 +1,47 @@
-# 🎓 AI Skill Development Roadmap Generator
+# AI Skill Development Roadmap Generator
 
-An AI-powered web application that generates personalized skill development roadmaps based on a student's career goals, current skill level, daily available time, budget, and learning preferences.
+**Team ID:** SIC/26-27/Team302
 
-The application helps students plan their learning journey through structured weekly roadmaps, practical assignments, learning resources, and progress tracking.
+**Project ID:** SIC 2.0-25
 
-## 🚀 Features
+## Project Overview
 
-- **AI-Powered Roadmap Generation:** Generates personalized learning roadmaps using Gemini AI.
-- **Student Profile:** Save and manage student information and learning preferences.
-- **My Roadmaps:** View and manage previously generated roadmaps.
-- **Weekly Learning Plans:** Get structured topics and practical assignments.
-- **Learning Resources:** Access useful learning materials.
-- **Progress Tracking:** Mark completed tasks and monitor learning progress.
-- **Advanced Analytics:** View learning statistics and progress insights.
-- **PDF Export:** Download generated roadmaps as PDF files.
-- **Database Management:** Store student profiles, roadmaps, and task progress using SQLite.
+The AI Skill Development Roadmap Generator is an AI-powered web application designed to help students and beginners create personalized learning roadmaps based on their career goals, current skill levels, daily available time, preferred language, and budget.
 
-## 🛠️ Technologies Used
+The application is developed using Python, Streamlit, Google Gemini API, and SQLite database.
 
-- Python
-- Streamlit
-- Google Gemini AI
-- SQLite
-- Pydantic
-- ReportLab
-- HTML and CSS
+## Project Objective
 
-## 📁 Project Structure
+The main objective of this project is to help students and beginners identify the skills required for their desired careers and follow a structured learning path.
 
-```text
-ai-skill-roadmap-generator/
-│
-├── app.py
-├── database.py
-├── pdf_helper.py
-├── roadmap_data.py
-├── roadmap_model.py
-├── requirements.txt
-├── .gitignore
-│
-└── utils/
-    ├── ai_helper.py
-    └── .gitignore
-```
+The key objectives are:
+- Generate personalized AI-powered skill development roadmaps.
+- Help users choose career goals and learning preferences.
+- Track learning progress and completed tasks.
+- Provide useful learning resources.
+- Allow users to download roadmaps in PDF format.
+- Make skill development accessible and organized.
 
-## ⚙️ Installation and Setup
+## Conclusion
 
-### 1. Clone the repository
+The AI Skill Development Roadmap Generator provides a user-friendly platform for personalized learning and career-oriented skill development. It combines artificial intelligence, database management, and web development to help learners plan their learning journeys and monitor their progress.
 
-```bash
-git clone https://github.com/snehaa200507-crypto/ai-skill-roadmap-generator.git
-```
+This project demonstrates the practical application of AI in education and supports students in making informed career and learning decisions.
 
-### 2. Open the project folder
+## Team Members Details
 
-```bash
-cd ai-skill-roadmap-generator
-```
+| S.No. | SIC ID | Name of Student/Member | Email ID for GitHub | Role in Project |
+|---|---|---|---|---|
+| 1 | SIC202611899 | Ms. Sneha | snehaa200507@gmail.com | Team Leader |
+| 2 | SIC202611967 | Ms. Mehak Sharma | mehaksharma53665@gmail.com | Data Lead |
+| 3 | SIC202611994 | Ms. Mehakpreet Kaur | mehak8968878@gmail.com | Model Builder |
+| 4 | SIC202611897 | Ms. Nilu Kumari | nilukumari5433@gmail.com | Research & Testing |
+| 5 | SIC202611987 | Ms. Riya | r0428202@gmail.com | Presentation & Demo |
 
-### 3. Create a virtual environment
+## Project Links
 
-```bash
-python -m venv .venv
-```
+**GitHub Repository:**  
+https://github.com/snehaa200507-crypto/ai-skill-roadmap-generator
 
-### 4. Activate the virtual environment
-
-For Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-### 5. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 6. Configure Gemini API
-
-Create a `.env` file in the project folder and add your Gemini API key using the environment variable name expected by `utils/ai_helper.py`.
-
-**Important:** Never upload your API key or `.env` file to GitHub.
-
-### 7. Run the application
-
-```bash
-streamlit run app.py
-```
-
-The application will open in your browser.
-
-## 🎯 Project Objective
-
-The main objective of this project is to help students identify suitable learning paths and develop career-related skills through AI-generated personalized roadmaps.
-
-It aims to make skill development more structured, accessible, and manageable.
-
-## 👩‍💻 Project Team
-
-| Team Member | Role |
-|---|---|
-| Sneha | Team Leader |
-| Mehak Sharma | Data Lead |
-| Mehakpreet Kaur | Model Builder |
-| Nilu Kumari | Research and Testing |
-| Riya | Presentation and Demo |
-
-## 🔮 Future Scope
-
-- More AI-powered career recommendations.
-- Additional learning resource integrations.
-- Personalized assessments and quizzes.
-- Improved analytics and reporting.
-- Deployment as a publicly accessible web application.
-
-## 👩‍🎓 Project Information
-
-**Project Name:** AI Skill Development Roadmap Generator  
-**Domain:** Education  
-**Project Type:** AI-Based Web Application  
-**Developed Using:** Python and Streamlit
-
-## 📌 Repository
-
-[GitHub – AI Skill Development Roadmap Generator](https://github.com/snehaa200507-crypto/ai-skill-roadmap-generator)
-
----
-
-**Developed as a BCA Academic Project.**
+**Live Website:**  
+https://ai-skill-roadmap-generator-n8nqmp6gez74t5ycbnp8tn.streamlit.app/
