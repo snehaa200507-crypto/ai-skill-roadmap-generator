@@ -1,5 +1,6 @@
 
 import streamlit as st
+import base64
 
 from database import (
     init_db,
@@ -332,6 +333,7 @@ PAGES = [
     "Generate Roadmap",
     "My Roadmaps",
     "Learning Resources",
+    "PDF Reader",
     "Progress Tracking",
     "Advanced Analytics"
 ]
@@ -448,6 +450,13 @@ elif page == "Student Profile":
     ]
     budget_options = ["Free", "Low Budget", "Medium Budget", "Flexible"]
     language_options = ["English", "Hindi", "Hinglish"]
+    career_options = [
+        "Digital Marketing", "Social Media Management", "Web Development",
+        "Python Development", "Data Science", "Graphic Design",
+        "UI/UX Design", "Other"
+    ]
+    saved_career = profile.get("career_goal", "")
+    saved_career_choice = saved_career if saved_career in career_options else "Other"
 
     with st.form("student_profile_form"):
 
@@ -472,8 +481,20 @@ elif page == "Student Profile":
 
         st.subheader("Learning Preferences")
 
-        career_goal = st.text_input(
-            "Career Goal", value=profile.get("career_goal", "")
+        career_goal_choice = st.selectbox(
+            "Career Goal",
+            career_options,
+            index=career_options.index(saved_career_choice)
+        )
+        career_goal_custom = ""
+        if career_goal_choice == "Other":
+            career_goal_custom = st.text_input(
+                "Enter Your Career Goal",
+                value=saved_career if saved_career not in career_options else ""
+            )
+        career_goal = (
+            career_goal_custom.strip() if career_goal_choice == "Other"
+            else career_goal_choice
         )
 
         skill_level = st.selectbox(
@@ -584,6 +605,13 @@ elif page == "Generate Roadmap":
     ]
     budget_options = ["Free", "Low Budget", "Medium Budget", "Flexible"]
     language_options = ["English", "Hindi", "Hinglish"]
+    career_options = [
+        "Digital Marketing", "Social Media Management", "Web Development",
+        "Python Development", "Data Science", "Graphic Design",
+        "UI/UX Design", "Other"
+    ]
+    saved_career = profile.get("career_goal", "")
+    saved_career_choice = saved_career if saved_career in career_options else "Other"
 
     with st.form("roadmap_form"):
 
@@ -593,8 +621,20 @@ elif page == "Generate Roadmap":
             "Full Name", value=profile.get("full_name", "")
         )
 
-        career_goal = st.text_input(
-            "Career Goal", value=profile.get("career_goal", "")
+        career_goal_choice = st.selectbox(
+            "Career Goal",
+            career_options,
+            index=career_options.index(saved_career_choice)
+        )
+        career_goal_custom = ""
+        if career_goal_choice == "Other":
+            career_goal_custom = st.text_input(
+                "Enter Your Career Goal",
+                value=saved_career if saved_career not in career_options else ""
+            )
+        career_goal = (
+            career_goal_custom.strip() if career_goal_choice == "Other"
+            else career_goal_choice
         )
 
         skill_level = st.selectbox(
@@ -857,6 +897,45 @@ elif page == "Learning Resources":
             st.subheader(title)
             st.write(description)
             st.markdown(f"[Visit Learning Platform]({url})")
+
+
+# ==================================================
+# PDF READER
+# ==================================================
+
+elif page == "PDF Reader":
+
+    st.title("📖 PDF Reader")
+    st.write("Upload a PDF file to read it directly inside this website.")
+
+    uploaded_pdf = st.file_uploader(
+        "Choose a PDF file",
+        type=["pdf"],
+        accept_multiple_files=False,
+        key="pdf_reader_upload"
+    )
+
+    if uploaded_pdf is not None:
+        pdf_bytes = uploaded_pdf.getvalue()
+        encoded_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+        pdf_viewer = f"""
+            <iframe
+                src=\"data:application/pdf;base64,{encoded_pdf}#toolbar=1&navpanes=1&scrollbar=1\"
+                width=\"100%\" height=850px
+                style=\"border:1px solid #45415f; border-radius:12px;\"
+                type=\"application/pdf\">
+            </iframe>
+        """
+        st.components.v1.html(pdf_viewer, height=870, scrolling=True)
+        st.download_button(
+            "⬇️ Download Uploaded PDF",
+            data=pdf_bytes,
+            file_name=uploaded_pdf.name,
+            mime="application/pdf",
+            key="download_uploaded_pdf"
+        )
+    else:
+        st.info("Upload a PDF above. Your document will appear here for reading.")
 
 
 # ==================================================
